@@ -67,20 +67,23 @@
   function loadBoxes() {
     if (loading) return;
     loading = true;
-    loadingEl.textContent = 'Loading...';
 
-    // simulate a short network delay, like a real infinite-scroll API call
-    setTimeout(() => {
-      for (let i = 0; i < perLoad; i++) {
-        count++;
-        const box = document.createElement('div');
-        box.className = 'box';
-        box.textContent = count;
-        container.appendChild(box);
-      }
-      loadingEl.textContent = 'Scroll down to load more...';
-      loading = false;
-    }, 300);
+    // Boxes are appended synchronously, with no artificial delay. A
+    // scraping tool typically snapshots the page right after it loads,
+    // without waiting for any extra async JS unless explicitly told to
+    // (e.g. a "wait" instruction) — so an artificial delay here would
+    // mean the very first batch of boxes might not exist yet at capture
+    // time, making the "no scroll_y" baseline request look empty for
+    // reasons that have nothing to do with scrolling.
+    for (let i = 0; i < perLoad; i++) {
+      count++;
+      const box = document.createElement('div');
+      box.className = 'box';
+      box.textContent = count;
+      container.appendChild(box);
+    }
+    loadingEl.textContent = 'Scroll down to load more...';
+    loading = false;
   }
 
   function checkScroll() {
